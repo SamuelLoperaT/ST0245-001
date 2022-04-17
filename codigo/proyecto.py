@@ -18,32 +18,32 @@ area = gpd.GeoDataFrame(area)
 
 data['harassmentRisk'].fillna(data['harassmentRisk'].mean(), inplace = True)
 
-doble_sentido = data.rename(columns ={'origin': 'destino','destination': 'origen' })
-doble_sentido = doble_sentido[doble_sentido['oneway'] == True]
-doble_sentido = doble_sentido.rename(columns = {'destino': 'destination', 'origen': 'origin'})
-doble_sentido = doble_sentido[['name', 'origin', 'destination', 'length', 'oneway', 'harassmentRisk',
+two_way = data.rename(columns ={'origin': 'destino','destination': 'origen' })
+two_way = two_way[two_way['oneway'] == True]
+two_way = two_way.rename(columns = {'destino': 'destination', 'origen': 'origin'})
+two_way = two_way[['name', 'origin', 'destination', 'length', 'oneway', 'harassmentRisk',
        'geometry']]
 
-doble_sentido = doble_sentido[['name', 'origin', 'destination', 'length', 'harassmentRisk',
+two_way = two_way[['name', 'origin', 'destination', 'length', 'harassmentRisk',
        'geometry']]
 data1 = data[['name', 'origin', 'destination', 'length', 'harassmentRisk',
        'geometry']]
 
-dataframes = [data1, doble_sentido]
+dataframes = [data1, two_way]
 
-calles = pd.concat(dataframes)
+streets = pd.concat(dataframes)
 
 
 
-corto = nx.from_pandas_edgelist(calles, source = 'origin', target = 'destination', edge_attr = 'length')
-recorrido_dist = nx.dijkstra_path(corto, source= origin, target = end, weight = True)
-origenes_dist = recorrido_dist[:-1]
-destinos_dist = recorrido_dist[1:]
+shortest = nx.from_pandas_edgelist(streets, source = 'origin', target = 'destination', edge_attr = 'length')
+path_shortest = nx.dijkstra_path(shortest, source= origin, target = end, weight = True)
+origins_shortest = path_shortest[:-1]
+destinations_shortest = path_shortest[1:]
 
-acoso = nx.from_pandas_edgelist(calles, source = 'origin', target = 'destination', edge_attr = 'harassmentRisk')
-recorrido_risk = nx.dijkstra_path(acoso, source= origin, target = end, weight = True)
-origenes_risk = recorrido_risk[:-1]
-destinos_risk = recorrido_risk[1:]
+harassment = nx.from_pandas_edgelist(streets, source = 'origin', target = 'destination', edge_attr = 'harassmentRisk')
+path_risk = nx.dijkstra_path(harassment, source= origin, target = end, weight = True)
+origins_risk = path_risk[:-1]
+destinations_risk = path_risk[1:]
 
 #Create plot
 fig, ax = plt.subplots(figsize=(12,8))
@@ -54,8 +54,8 @@ area.plot(ax=ax, facecolor='black')
 # Plot street data
 data.plot(ax=ax, linewidth=1, edgecolor='dimgray')
 length = 0
-for i in range(len(origenes_dist)):
-    dist = calles[(calles['origin'] == origenes_dist[i]) & (calles['destination'] == destinos_dist[i])]
+for i in range(len(origins_shortest)):
+    dist = streets[(streets['origin'] == origins_shortest[i]) & (streets['destination'] == destinations_shortest[i])]
     dist.plot(ax = ax,linewidth=1, edgecolor='y')
     length += dist['length'].values
 #recorrido.plot(ax=ax, linewidth=1, edgecolor='y')
@@ -71,8 +71,8 @@ area.plot(ax=ax, facecolor='black')
 
 # Plot street data
 data.plot(ax=ax, linewidth=1, edgecolor='dimgray')
-for i in range(len(origenes_risk)):
-    risk = calles[(calles['origin'] == origenes_risk[i]) & (calles['destination'] == destinos_risk[i])]
+for i in range(len(origins_risk)):
+    risk = streets[(streets['origin'] == origins_risk[i]) & (streets['destination'] == destinations_risk[i])]
     risk.plot(ax = ax,linewidth=1, edgecolor='y')
 #recorrido.plot(ax=ax, linewidth=1, edgecolor='y')
 plt.title('Least Harassment Risk Path')
