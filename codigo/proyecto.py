@@ -53,11 +53,13 @@ area.plot(ax=ax, facecolor='black')
 
 # Plot street data
 data.plot(ax=ax, linewidth=1, edgecolor='dimgray')
+length = 0
 for i in range(len(origenes_dist)):
     dist = calles[(calles['origin'] == origenes_dist[i]) & (calles['destination'] == destinos_dist[i])]
     dist.plot(ax = ax,linewidth=1, edgecolor='y')
+    length += dist['length'].values
 #recorrido.plot(ax=ax, linewidth=1, edgecolor='y')
-plt.title(' Shortest Path')
+plt.title(f'Shortest Path \n Length: {int(length)}')
 plt.tight_layout()
 plt.show()
 
